@@ -56,7 +56,7 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          commentText: comment.content, // ✅ send actual text
+          commentText: comment.content,
           targetLanguage,
         }),
       })
@@ -64,7 +64,7 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
       const data = await response.json()
       if (data.translatedText) {
         setTranslatedText(data.translatedText)
-        setSourceLanguage("auto") // fallback since API doesn’t return it
+        setSourceLanguage("auto")
         setShowTranslation(true)
       }
     } catch (error) {
@@ -84,35 +84,39 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
   }
 
   return (
-    <Card className="bg-card border-border shadow-sm hover:shadow-md transition-shadow duration-200">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
+    <Card className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 border border-purple-100/40 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-4">
           <CommentAvatar username={comment.username} />
 
           <div className="flex-1 min-w-0">
+            {/* Username + Location */}
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-semibold text-card-foreground text-sm">{comment.username}</h4>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="w-3 h-3" />
+              <h4 className="font-semibold text-sm text-indigo-700">
+                {comment.username}
+              </h4>
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <MapPin className="w-3 h-3 text-pink-500" />
                 {comment.city}, {comment.country}
               </div>
             </div>
 
-            <div className="text-xs text-muted-foreground mb-3">{formatDate(comment.createdAt)}</div>
+            <div className="text-xs text-gray-400 mb-3">{formatDate(comment.createdAt)}</div>
 
+            {/* Comment Content */}
             <div className="mb-4">
-              <p className="text-card-foreground text-sm leading-relaxed text-pretty">
+              <p className="text-sm text-gray-800 leading-relaxed">
                 {showTranslation ? translatedText : comment.content}
               </p>
 
               {showTranslation && (
-                <div className="mt-2 text-xs text-muted-foreground italic">
+                <div className="mt-2 text-xs text-indigo-500 italic">
                   {`Translated → ${targetLanguage.toUpperCase()}`}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowTranslation(false)}
-                    className="ml-2 h-auto p-0 text-xs text-primary hover:text-primary/80"
+                    className="ml-2 h-auto p-0 text-xs text-indigo-600 hover:text-indigo-400"
                   >
                     Show original
                   </Button>
@@ -120,15 +124,16 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
               )}
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Like/Dislike */}
-              <div className="flex items-center gap-2">
+            {/* Actions */}
+            <div className="flex items-center gap-5">
+              {/* Like / Dislike */}
+              <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleLike}
                   disabled={isLiking}
-                  className="h-8 px-2 text-muted-foreground hover:text-green-600 hover:bg-green-50"
+                  className="h-8 px-3 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg"
                 >
                   {isLiking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-4 h-4" />}
                   <span className="ml-1 text-xs">{comment.likes}</span>
@@ -139,7 +144,7 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                   size="sm"
                   onClick={handleDislike}
                   disabled={isDisliking}
-                  className="h-8 px-2 text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                  className="h-8 px-3 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
                 >
                   {isDisliking ? <Loader2 className="w-4 h-4 animate-spin" /> : <HeartOff className="w-4 h-4" />}
                   <span className="ml-1 text-xs">{comment.dislikes}</span>
@@ -151,9 +156,25 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                 <select
                   value={targetLanguage}
                   onChange={(e) => setTargetLanguage(e.target.value)}
-                  className="text-xs bg-input border-border rounded px-2 py-1 text-foreground"
+                  className="text-xs bg-white/70 border border-gray-200 rounded-md px-2 py-1 shadow-sm focus:ring-2 focus:ring-indigo-300"
                 >
                   <option value="en">English</option>
+                  <option value="hi">Hindi</option>
+                  <option value="te">Telugu</option>
+                  <option value="ta">Tamil</option>
+                  <option value="kn">Kannada</option>
+                  <option value="ml">Malayalam</option>
+                  <option value="bn">Bengali</option>
+                  <option value="mr">Marathi</option>
+                  <option value="gu">Gujarati</option>
+                  <option value="pa">Punjabi</option>
+                  <option value="ur">Urdu</option>
+                  <option value="or">Odia</option>
+                  <option value="as">Assamese</option>
+                  <option value="ks">Kashmiri</option>
+                  <option value="mai">Maithili</option>
+                  <option value="sd">Sindhi</option>
+                  <option value="sa">Sanskrit</option>
                   <option value="es">Spanish</option>
                   <option value="fr">French</option>
                   <option value="de">German</option>
@@ -170,7 +191,7 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                   size="sm"
                   onClick={handleTranslate}
                   disabled={isTranslating}
-                  className="h-8 px-2 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  className="h-8 px-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                 >
                   {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
                   <span className="ml-1 text-xs">Translate</span>
