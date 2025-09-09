@@ -102,3 +102,48 @@ export function CommentForm({ onCommentAdded }: CommentFormProps) {
     </Card>
   )
 }
+async function getUserLocation() {
+  return new Promise<{ city: string; country: string } | null>((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+          );
+          const data = await res.json();
+          const city = data.address.city || data.address.town || data.address.village || "Unknown";
+          const country = data.address.country || "Unknown";
+          resolve({ city, country });
+        } catch (err) {
+          console.error("Reverse geocode failed", err);
+          resolve({ city: "Unknown", country: "Unknown" });
+        }
+      },
+      (err) => {
+        console.error("Geolocation failed", err);
+        resolve({ city: "Unknown", country: "Unknown" });
+      }
+    );
+  });
+}
+
+async function submitComment(username: string, content: string) {
+  const location = await getUserLocation(); // <-- get actual user location
+
+  const res = await fetch("/api/comments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username,
+      content,
+      location, // send location to backend
+    }),
+  });
+
+  return res.json();
+}

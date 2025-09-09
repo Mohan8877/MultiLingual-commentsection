@@ -1,42 +1,38 @@
 import { NextRequest } from "next/server"
 
-export function getClientIP(req: NextRequest): string {
-  // Check common headers set by reverse proxies (like Vercel, Nginx, etc.)
-  const forwardedFor = req.headers.get("x-forwarded-for")
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim()
+export function getClientIP(request: NextRequest): string {
+  // Try to get IP from various headers (for different hosting environments)
+  const forwarded = request.headers.get("x-forwarded-for")
+  const realIP = request.headers.get("x-real-ip")
+  const cfConnectingIP = request.headers.get("cf-connecting-ip")
+
+  if (forwarded) {
+    return forwarded.split(",")[0].trim()
   }
 
-  const realIP = req.headers.get("x-real-ip")
   if (realIP) {
     return realIP
   }
 
-  // Fallback to Next.js provided IP or localhost
-  return req.ip ?? "127.0.0.1"
+  if (cfConnectingIP) {
+    return cfConnectingIP
+  }
+
+  // Fallback to default IP if none of the headers are present
+  return "127.0.0.1"
 }
-
 export async function getLocationFromIP(ip: string) {
+  if (ip === '127.0.0.1' || ip === '::1') {
+    // Local development fallback
+    return { city: 'Localhost', country: 'Localhost' };
+  }
+
   try {
-    // Local dev fallback
-    if (ip === "127.0.0.1" || ip === "::1") {
-      return { city: "Localhost", country: "Local Development" }
-    }
-
-    // Free API for IP geolocation
-    const res = await fetch(`https://ipapi.co/${ip}/json/`, { cache: "no-store" })
-    if (!res.ok) {
-      throw new Error("Failed to fetch location")
-    }
-
-    const data = await res.json()
-
-    return {
-      city: data.city || "Unknown",
-      country: data.country_name || "Unknown",
-    }
+    const response = await fetch(`https://ipapi.co/${ip}/json/`);
+    if (!response.ok) throw new Error('Failed to fetch location');
+    return await response.json();
   } catch (err) {
-    console.error("IP location lookup failed:", err)
-    return { city: "Unknown", country: "Unknown" }
+    console.warn('Location fetch failed, returning fallback', err);
+    return { city: 'Unknown', country: 'Unknown' };
   }
 }

@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { dbOps } from "@/lib/database-operations"
-import { getClientIP, getLocationFromIP } from "@/lib/ip-utils"
 import { validateComment, validateUsername } from "@/lib/models/comment"
 import { socketEmitter } from "@/lib/socket-emitter"
+import { getClientIP, getLocationFromIP } from "@/lib/ip-utils"
 
 // 🔹 Fetch all comments
 export async function GET() {
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { username, content } = body
 
+    // Validate input
     if (!validateUsername(username)) {
       return NextResponse.json(
         { success: false, error: "Invalid username" },
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ✅ Detect IP + Location (server side)
     const clientIP = getClientIP(request)
     const location = await getLocationFromIP(clientIP)
 

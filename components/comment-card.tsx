@@ -91,17 +91,26 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
 
           <div className="flex-1 min-w-0">
             {/* Username + Location */}
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h4 className="font-semibold text-sm text-indigo-700">
                 {comment.username}
               </h4>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <MapPin className="w-3 h-3 text-pink-500" />
-                {comment.city}, {comment.country}
-              </div>
+
+              {/* ✅ Location (only if available) */}
+              {(comment.city || comment.country) && (
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <MapPin className="w-3 h-3 text-pink-500" />
+                  <p className="text-sm text-gray-500">
+                    {comment.city ?? "Unknown"},{" "}
+                    {comment.country ?? "Unknown"}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="text-xs text-gray-400 mb-3">{formatDate(comment.createdAt)}</div>
+            <div className="text-xs text-gray-400 mb-3">
+              {formatDate(comment.createdAt)}
+            </div>
 
             {/* Comment Content */}
             <div className="mb-4">
@@ -135,7 +144,11 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                   disabled={isLiking}
                   className="h-8 px-3 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg"
                 >
-                  {isLiking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-4 h-4" />}
+                  {isLiking ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Heart className="w-4 h-4" />
+                  )}
                   <span className="ml-1 text-xs">{comment.likes}</span>
                 </Button>
 
@@ -146,7 +159,11 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                   disabled={isDisliking}
                   className="h-8 px-3 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
                 >
-                  {isDisliking ? <Loader2 className="w-4 h-4 animate-spin" /> : <HeartOff className="w-4 h-4" />}
+                  {isDisliking ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <HeartOff className="w-4 h-4" />
+                  )}
                   <span className="ml-1 text-xs">{comment.dislikes}</span>
                 </Button>
               </div>
@@ -193,7 +210,11 @@ export function CommentCard({ comment, onCommentUpdate }: CommentCardProps) {
                   disabled={isTranslating}
                   className="h-8 px-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                 >
-                  {isTranslating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Languages className="w-4 h-4" />}
+                  {isTranslating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Languages className="w-4 h-4" />
+                  )}
                   <span className="ml-1 text-xs">Translate</span>
                 </Button>
               </div>
