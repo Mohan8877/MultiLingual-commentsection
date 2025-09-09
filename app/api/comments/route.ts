@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { dbOps } from "@/lib/database-operations"
 import { validateComment, validateUsername } from "@/lib/models/comment"
 import { socketEmitter } from "@/lib/socket-emitter"
-import { getClientIP, getLocationFromIP } from "@/lib/ip-utils"
+import { getClientIP, getLocationFromIP } from "@/lib/ip-utils";
 
 // 🔹 Fetch all comments
 export async function GET() {
@@ -16,29 +16,16 @@ export async function GET() {
 }
 
 // 🔹 Create a new comment
+
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { username, content } = body
+    const body = await request.json();
+    const { username, content } = body;
 
-    // Validate input
-    if (!validateUsername(username)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid username" },
-        { status: 400 }
-      )
-    }
-
-    if (!validateComment(content)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid comment" },
-        { status: 400 }
-      )
-    }
-
-    // ✅ Detect IP + Location (server side)
-    const clientIP = getClientIP(request)
-    const location = await getLocationFromIP(clientIP)
+    // Get IP + Location
+    const clientIP = await getClientIP(request);
+    const location = await getLocationFromIP(clientIP);
 
     const comment = await dbOps.createComment({
       username: username.trim(),
@@ -50,13 +37,16 @@ export async function POST(request: NextRequest) {
       dislikes: 0,
       likedBy: [],
       dislikedBy: [],
-    })
+    });
 
-    socketEmitter.emitNewComment(comment)
+    socketEmitter.emitNewComment(comment);
 
-    return NextResponse.json({ success: true, data: comment }, { status: 201 })
+    return NextResponse.json({ success: true, data: comment }, { status: 201 });
   } catch (error) {
-    console.error("Error creating comment:", error)
-    return NextResponse.json({ success: false, error: "Failed to create comment" }, { status: 500 })
+    console.error("Error creating comment:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to create comment" },
+      { status: 500 }
+    );
   }
 }
